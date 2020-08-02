@@ -27,6 +27,18 @@ class Data():
         masks = [[1]*s_len + [0]*(max_len-s_len) for s_len in slice_len]
         return slice, masks
 
+    def data_masks_max_clip_pos(self, data, pad):
+        # use max_len
+        slice_len = [min(len(session), self.max_len) for session in data]
+        max_len = max(slice_len)
+        slice = np.zeros((len(data), max_len)).astype('int64')
+        pos_mask = np.zeros((len(data), max_len)).astype('int64')
+        for idx, s in enumerate(data):
+            slice[idx, :slice_len[idx]] = s[-slice_len[idx]:]
+            pos_mask[idx, :slice_len[idx]] = range(slice_len[idx],0,-1)
+        masks = [[1]*s_len + [0]*(max_len-s_len) for s_len in slice_len]
+        return slice, masks, pos_mask
+
     def generate_batch(self, batch_size):
         if self.shuffle:
             shuffled_arg = np.arange(self.length)
@@ -48,4 +60,7 @@ class Data():
         elif self.method == 'IEM':
             inputs, masks = self.data_masks_max_clip(self.inputs[index],[0])
             return inputs, masks, self.targets[index]
+        elif self.method == 'IEM_pos':
+            inputs, masks, pos_masks = self.data_masks_max_clip_pos(self.inputs[index],[0])
+            return inputs, masks, self.targets[index], pos_masks
 

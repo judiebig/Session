@@ -1,5 +1,6 @@
 '''
-Realize SR-IEM
+SR-IEM-POS
+add position information
 '''
 
 import torch
@@ -19,9 +20,9 @@ def trans_to_cuda(variable):
         return variable
 
 
-class SrIEM(Module):
+class SrIEMPos(Module):
     def __init__(self, opt, n_node):
-        super(SrIEM, self).__init__()
+        super(SrIEMPos, self).__init__()
         self.hidden_size = opt.hidden_size
         self.batch_size = opt.batch_size
         self.n_node = n_node
@@ -35,6 +36,9 @@ class SrIEM(Module):
         self.Q = nn.Linear(self.hidden_size, self.attention_dim, False)
         self.K = nn.Linear(self.hidden_size, self.attention_dim, False)
 
+        # position
+        self.pos_embedding = nn.Embedding(opt.max_len+1, self.hidden_size)
+
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.Adam(self.parameters(), lr=opt.lr, weight_decay=opt.l2)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=opt.lr_dc_step, gamma=opt.lr_dc)
@@ -45,8 +49,11 @@ class SrIEM(Module):
         for weight in self.parameters():
             weight.data.uniform_(-stdv, stdv)
 
-    def iem(self, inputs, masks):
+    def iem_pos(self, inputs, masks, pos_masks):
         inputs_emb = self.embedding(inputs)  # [b,n,d]
+        pos_emb = self.pos_embedding(pos_masks) # [b,n,d]
+        pos_emb = torch.mul(pos_emb, masks.view(self.batch_size,-1,1))
+        inputs_emb = inputs_emb + pos_emb
         Q = torch.sigmoid(self.Q(inputs_emb))  # [b,n,l]
         K = torch.sigmoid(self.K(inputs_emb))  # [b.n,l]
         KT = K.permute(0,2,1)  # [b,l,n]
@@ -67,10 +74,10 @@ class SrIEM(Module):
         final = torch.sum(alpha * inputs_emb, 1)  # [b,d]  mean sum
         return final
 
-    def forward(self, inputs, masks):
+    def forward(self, inputs, masks, pos_masks):
         last_id = [inputs[i][j - 1] for i, j in zip(range(len(inputs)), torch.sum(masks, 1))]
         last_id = torch.Tensor(last_id).long().cuda()
-        att_final = self.iem(inputs, masks)
+        att_final = self.iem_pos(inputs, masks, pos_masks)
         last_inputs_emb = self.embedding(last_id)
         final_rep = self.linear_transform(torch.cat([att_final, last_inputs_emb], 1))
         b = self.embedding.weight[1:]
@@ -92,11 +99,12 @@ def train_and_test(model, train_data, test_data, opt):
         train_loss = 0.0
         for i, j in zip(slices, tqdm(np.arange(len(slices)))):
             model.optimizer.zero_grad()
-            inputs, masks, targets = train_data.get_slice(i)
+            inputs, masks, targets, pos_masks = train_data.get_slice(i)
             inputs = trans_to_cuda(torch.Tensor(inputs).long())
             masks = trans_to_cuda(torch.Tensor(masks).long())
+            pos_masks = trans_to_cuda(torch.Tensor(pos_masks).long())
             targets = trans_to_cuda(torch.Tensor(targets).long())
-            scores = model(inputs, masks)
+            scores = model(inputs, masks, pos_masks)
             loss = model.criterion(scores, targets - 1)
             # print(loss,loss_cl)
             loss.backward()
@@ -114,11 +122,12 @@ def train_and_test(model, train_data, test_data, opt):
             slices = train_data.generate_batch(opt.batch_size)
             with torch.no_grad():
                 for i, j in zip(slices, tqdm(np.arange(len(slices)))):
-                    inputs, masks, targets = train_data.get_slice(i)
+                    inputs, masks, targets, pos_masks = train_data.get_slice(i)
                     inputs = trans_to_cuda(torch.Tensor(inputs).long())
                     masks = trans_to_cuda(torch.Tensor(masks).long())
+                    pos_masks = trans_to_cuda(torch.Tensor(pos_masks).long())
                     targets = trans_to_cuda(torch.Tensor(targets).long())
-                    scores = model(inputs, masks)
+                    scores = model(inputs, masks, pos_masks)
                     sub_scores = scores.topk(20)[1].cpu().numpy()
                     targets = targets.cpu().numpy()
                     for score, target in zip(sub_scores, targets):
@@ -137,11 +146,12 @@ def train_and_test(model, train_data, test_data, opt):
         slices = test_data.generate_batch(opt.batch_size)
         with torch.no_grad():
             for i, j in zip(slices, tqdm(np.arange(len(slices)))):
-                inputs, masks, targets = test_data.get_slice(i)
+                inputs, masks, targets, pos_masks = test_data.get_slice(i)
                 inputs = trans_to_cuda(torch.Tensor(inputs).long())
                 masks = trans_to_cuda(torch.Tensor(masks).long())
+                pos_masks = trans_to_cuda(torch.Tensor(pos_masks).long())
                 targets = trans_to_cuda(torch.Tensor(targets).long())
-                scores = model(inputs, masks)
+                scores = model(inputs, masks, pos_masks)
                 sub_scores = scores.topk(20)[1].cpu().numpy()
                 targets = targets.cpu().numpy()
                 for score, target in zip(sub_scores, targets):

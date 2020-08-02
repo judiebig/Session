@@ -22,8 +22,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default='yoochoose1_64', help='dataset: yoochoose1_4/yoochoose1_64')
 parser.add_argument('--batch_size', type=int, default=128, help='input batch size')
 parser.add_argument('--epoch', type=int, default=30, help='number of epochs to train for')
-parser.add_argument('--method', type=str, default='IEM', help='how to process data: normal/IEM')
-parser.add_argument('--hidden_size', type=int, default=200, help='hidden state size')
+parser.add_argument('--method', type=str, default='IEM_pos', help='how to process data: normal/IEM/IEM_pos')
+parser.add_argument('--hidden_size', type=int, default=200 , help='hidden state size')
 parser.add_argument('--lr', type=float, default=0.001, help='learning rate')  # [0.001, 0.0005, 0.0001]
 parser.add_argument('--lr_dc', type=float, default=0.1, help='learning rate decay rate')
 parser.add_argument('--lr_dc_step', type=int, default=3, help='number of steps after which the learning rate decay')
@@ -39,10 +39,9 @@ n_node = 37484
 
 def main():
     """  ---------load model--------------- """
-    model = trans_to_cuda(SrIEM(opt, n_node))
+    model = trans_to_cuda(SrIEMPos(opt, n_node))
 
     # preliminaries
-    seed_torch(2020)
     seed_torch(2020)
     log_filename = "./results/log_" + model.__class__.__name__ + ".txt"
     logging.basicConfig(level=logging.INFO, format='%(message)s', filename=log_filename, filemode='w')
