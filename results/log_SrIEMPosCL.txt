@@ -1,0 +1,71 @@
+{
+    "dataset": "yoochoose1_64",
+    "batch_size": 128,
+    "epoch": 30,
+    "method": "IEM_pos",
+    "hidden_size": 200,
+    "lr": 0.001,
+    "lr_dc": 0.1,
+    "lr_dc_step": 3,
+    "l2": 1e-05,
+    "patience": 3,
+    "is_train_eval": false,
+    "max_len": 10,
+    "cl_lambda": 10
+}
+epoch: 0, ===========================================
+start training: 2020-08-04 18:47:03.454954
+start predicting: 2020-08-04 18:49:01.960809
+current test result:
+	Recall@20:	64.6399456521739	MMR@20:	26.656419020639465	Epoch:	0
+epoch: 1, ===========================================
+start training: 2020-08-04 18:49:18.937379
+start predicting: 2020-08-04 18:51:16.752148
+current test result:
+	Recall@20:	68.13501144164759	MMR@20:	29.059894041605226	Epoch:	1
+epoch: 2, ===========================================
+start training: 2020-08-04 18:51:33.884301
+start predicting: 2020-08-04 18:53:31.537482
+current test result:
+	Recall@20:	69.43649885583524	MMR@20:	29.31374350327266	Epoch:	2
+epoch: 3, ===========================================
+start training: 2020-08-04 18:53:48.587884
+start predicting: 2020-08-04 18:55:46.513290
+current test result:
+	Recall@20:	71.02760297482837	MMR@20:	31.346150589236444	Epoch:	3
+epoch: 4, ===========================================
+start training: 2020-08-04 18:56:03.518782
+start predicting: 2020-08-04 18:58:00.838838
+current test result:
+	Recall@20:	71.11341533180779	MMR@20:	31.59263280505745	Epoch:	4
+epoch: 5, ===========================================
+start training: 2020-08-04 18:58:17.790502
+start predicting: 2020-08-04 19:00:14.421372
+current test result:
+	Recall@20:	70.99184782608695	MMR@20:	31.49927942682404	Epoch:	5
+epoch: 6, ===========================================
+start training: 2020-08-04 19:00:31.416892
+start predicting: 2020-08-04 19:02:28.226318
+current test result:
+	Recall@20:	71.21352974828376	MMR@20:	31.647830927735722	Epoch:	6
+epoch: 7, ===========================================
+start training: 2020-08-04 19:02:45.286664
+start predicting: 2020-08-04 19:04:41.945488
+current test result:
+	Recall@20:	71.22604405034325	MMR@20:	31.65623358890357	Epoch:	7
+epoch: 8, ===========================================
+start training: 2020-08-04 19:04:58.896127
+start predicting: 2020-08-04 19:06:55.534008
+current test result:
+	Recall@20:	71.24034610983982	MMR@20:	31.693529749976584	Epoch:	8
+epoch: 9, ===========================================
+start training: 2020-08-04 19:07:12.514566
+start predicting: 2020-08-04 19:09:09.462633
+current test result:
+	Recall@20:	71.23855835240275	MMR@20:	31.67086892296301	Epoch:	9
+epoch: 10, ===========================================
+start training: 2020-08-04 19:09:26.522009
+start predicting: 2020-08-04 19:11:23.257601
+current test result:
+	Recall@20:	71.2349828375286	MMR@20:	31.668216406190524	Epoch:	10
+best result: 	Recall@20:	71.24034610983982	MMR@20:	31.693529749976584

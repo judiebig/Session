@@ -31,7 +31,7 @@ parser.add_argument('--l2', type=float, default=1e-5, help='l2 penalty')  # [0.0
 parser.add_argument('--patience', type=int, default=3, help='the number of epoch to wait before early stop ')
 parser.add_argument('--is_train_eval', type=bool, default=False, help='eval train to prevent from over-fitting ')
 parser.add_argument('--max_len', type=int, default=10, help='sequence max length')
-parser.add_argument('--cl_lambda', type=float, default=1, help='cl weight')
+parser.add_argument('--cl_lambda', type=float, default=10, help='cl weight')
 opt = parser.parse_args()
 
 n_node = 37484
@@ -39,7 +39,7 @@ n_node = 37484
 
 def main():
     """  ---------load model--------------- """
-    model = trans_to_cuda(SrIEMPos(opt, n_node))
+    model = trans_to_cuda(SrIEMPosCL(opt, n_node))
 
     # preliminaries
     seed_torch(2020)
